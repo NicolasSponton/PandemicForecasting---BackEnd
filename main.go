@@ -32,9 +32,7 @@ func main() {
 	// Call the function to create the plot and save it
 	err := createPlotAndSave(dailyValues, futureValues)
 	if err != nil {
-		fmt.Println("Error:", err)
-	} else {
-		fmt.Println("Plot created and saved successfully.")
+		fmt.Println("error:", err)
 	}
 
 	// server.StartServer()
@@ -42,7 +40,8 @@ func main() {
 }
 
 func createPlotAndSave(dailyValues []int, futureValues []int) error {
-	// Create the "files" directory if it doesn't exist
+	futureValues = append([]int{dailyValues[len(dailyValues)-1]}, futureValues...)
+
 	err := os.MkdirAll("files", os.ModePerm)
 	if err != nil {
 		return err
@@ -99,7 +98,7 @@ func generateXValues(numDays int) []float64 {
 func generateFutureXValues(startX, numFutureDays int) []float64 {
 	futureXValues := make([]float64, numFutureDays)
 	for i := 0; i < numFutureDays; i++ {
-		futureXValues[i] = float64(startX + i)
+		futureXValues[i] = float64((startX - 1) + i)
 	}
 	return futureXValues
 }
