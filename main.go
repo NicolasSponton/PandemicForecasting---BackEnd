@@ -2,111 +2,112 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strconv"
-	"strings"
+	"os"
 
-	"github.com/PuerkitoBio/goquery"
+	"github.com/wcharczuk/go-chart"
 )
+
+type CaseData struct {
+	Daily    []int     `json:"daily"`
+	Forecast []float64 `json:"forecast"`
+}
 
 func main() {
 
-	data, err := scrapeAndProcessData()
+	// data, err := utils.ScrapeAndProcessData()
+	// if err != nil {
+	// 	fmt.Println("error:", err)
+	// 	return
+	// }
+
+	// dailyCases := []int{100, 120, 130, 110, 105, 125, 130, 115, 135, 140}
+
+	// forecastCases := utils.ExponentialSmoothing(dailyCases, 0.2, 7)
+	// utils.SaveCasesAsCSV(forecastCases)
+
+	// Example input data
+	dailyValues := []int{10, 15, 12, 18, 20, 22, 25}
+	futureValues := []int{30, 35, 40, 45}
+
+	// Call the function to create the plot and save it
+	err := createPlotAndSave(dailyValues, futureValues)
 	if err != nil {
-		fmt.Println("error:", err)
-		return
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println("Plot created and saved successfully.")
 	}
 
-	fmt.Println("Data: ", data)
-
-	// Sample data: daily COVID-19 cases
-	cases := []float64{100, 120, 150, 180, 200, 220, 250, 280, 300, 320}
-
-	// Initialize ARIMA model
-	model, err := arima.NewARIMA(1, 1, 1)
-	if err != nil {
-		fmt.Println("Error creating ARIMA model:", err)
-		return
-	}
-
-	// Fit ARIMA model to data
-	err = model.Fit(cases)
-	if err != nil {
-		fmt.Println("Error fitting ARIMA model:", err)
-		return
-	}
-
-	// Forecast the next 7 days
-	forecast, err := model.Forecast(7)
-	if err != nil {
-		fmt.Println("Error forecasting:", err)
-		return
-	}
-
-	fmt.Println("Forecast for the next 7 days:")
-	for i, val := range forecast {
-		fmt.Printf("Day %d: %.2f\n", i+1, val)
-	}
+	// server.StartServer()
 
 }
 
-func scrapeAndProcessData() ([]int, error) {
-	dataUrl := "https://www.worldometers.info/coronavirus/country/south-africa/"
-
-	res, err := http.Get(dataUrl)
+func createPlotAndSave(dailyValues []int, futureValues []int) error {
+	// Create the "files" directory if it doesn't exist
+	err := os.MkdirAll("files", os.ModePerm)
 	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	htmlSource, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
+		return err
 	}
 
-	err = ioutil.WriteFile("covid_data.html", htmlSource, 0644)
-	if err != nil {
-		return nil, err
+	// Create a new chart
+	graph := chart.Chart{
+		XAxis: chart.XAxis{
+			Name:      "Days",
+			NameStyle: chart.StyleShow(),
+		},
+		YAxis: chart.YAxis{
+			Name:      "Values",
+			NameStyle: chart.StyleShow(),
+		},
+		Series: []chart.Series{
+			chart.ContinuousSeries{
+				Name:    "Daily Values",
+				XValues: generateXValues(len(dailyValues)),
+				YValues: generateFloatYValues(dailyValues),
+			},
+			chart.ContinuousSeries{
+				Name:    "Future Values",
+				XValues: generateFutureXValues(len(dailyValues), len(futureValues)),
+				YValues: generateFloatYValues(futureValues),
+			},
+		},
 	}
 
-	fmt.Println("HTML source saved to covid_data.html")
-
-	document, err := goquery.NewDocumentFromReader(strings.NewReader(string(htmlSource)))
+	// Create a PNG file
+	file, err := os.Create("files/plot.png")
 	if err != nil {
-		return nil, err
+		return err
+	}
+	defer file.Close()
+
+	// Write the chart to the PNG file
+	err = graph.Render(chart.PNG, file)
+	if err != nil {
+		return err
 	}
 
-	var dailyCasesData []int
+	return nil
+}
 
-	// Find the script tag containing the chart data
-	scriptSelector := "script[type='text/javascript']"
-	document.Find(scriptSelector).Each(func(index int, scriptHtml *goquery.Selection) {
-		scriptText := scriptHtml.Text()
+func generateXValues(numDays int) []float64 {
+	xValues := make([]float64, numDays)
+	for i := 0; i < numDays; i++ {
+		xValues[i] = float64(i)
+	}
+	return xValues
+}
 
-		if strings.Contains(scriptText, "Highcharts.chart('graph-cases-daily'") {
-			// Find the start of the 'Daily Cases' data array
-			dailyCasesIndex := strings.Index(scriptText, "name: 'Daily Cases',")
-			dataStartIndex := strings.Index(scriptText[dailyCasesIndex:], "data: [") + dailyCasesIndex
+func generateFutureXValues(startX, numFutureDays int) []float64 {
+	futureXValues := make([]float64, numFutureDays)
+	for i := 0; i < numFutureDays; i++ {
+		futureXValues[i] = float64(startX + i)
+	}
+	return futureXValues
+}
 
-			// Extract the 'Daily Cases' data array
-			dataEndIndex := strings.Index(scriptText[dataStartIndex:], "]")
-			dailyCasesDataStr := scriptText[dataStartIndex+7 : dataStartIndex+dataEndIndex]
-
-			// Split the comma-separated string and process each element
-			for _, valueStr := range strings.Split(dailyCasesDataStr, ",") {
-				if valueStr == "null" {
-					dailyCasesData = append(dailyCasesData, 0)
-				} else {
-					value, err := strconv.Atoi(valueStr)
-					if err != nil {
-						return
-					}
-					dailyCasesData = append(dailyCasesData, value)
-				}
-			}
-		}
-	})
-
-	return dailyCasesData, nil
+func generateFloatYValues(intValues []int) []float64 {
+	floatValues := make([]float64, len(intValues))
+	for i, v := range intValues {
+		floatValues[i] = float64(v)
+	}
+	return floatValues
 }
