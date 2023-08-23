@@ -1,0 +1,2 @@
+To improve data forecasting, the software could take into account additional factors such as population density, economic status, age, and mobility.
+A different forecasting method could also make much more accurate predictions.
