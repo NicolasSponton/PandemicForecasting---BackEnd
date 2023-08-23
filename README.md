@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
-## About The Project
+## Pandemic Forecasting
 
-Covid Daily Cases Forecasting App  
+Covid Daily Cases Forecasting App - Back End  
 Generated files are stored in the 'files' folder
 
 
