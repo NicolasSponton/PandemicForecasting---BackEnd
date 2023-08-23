@@ -20,5 +20,5 @@ Generated files are stored in the 'files' folder
    ```
 3. run app
    ```sh
-   fo run main.go
+   go run main.go
    ```
