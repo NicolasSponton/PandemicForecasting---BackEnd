@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,17 +18,10 @@ func ScrapeAndProcessData() ([]int, error) {
 	}
 	defer res.Body.Close()
 
-	htmlSource, err := ioutil.ReadAll(res.Body)
+	htmlSource, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
-
-	err = ioutil.WriteFile("covid_data.html", htmlSource, 0644)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println("HTML source saved to covid_data.html")
 
 	document, err := goquery.NewDocumentFromReader(strings.NewReader(string(htmlSource)))
 	if err != nil {

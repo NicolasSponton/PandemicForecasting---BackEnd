@@ -7,16 +7,18 @@ import (
 	"time"
 )
 
-func ExponentialSmoothing(data []int, alpha float64, forecastDays int) []int {
-	forecast := make([]int, len(data)+forecastDays)
+func SimpleMovingAverage(dailyCases []int, numDays int) []int {
+	forecast := make([]int, numDays)
 
-	// Initialize the forecast with available data
-	for i, value := range data {
-		forecast[i] = value
-	}
-
-	for i := len(data); i < len(forecast); i++ {
-		forecast[i] = int(alpha*float64(data[i-len(data)]) + (1-alpha)*float64(forecast[i-1]))
+	lastNumDays := len(dailyCases)
+	if lastNumDays >= numDays {
+		for i := 0; i < numDays; i++ {
+			sum := 0
+			for j := lastNumDays - numDays + i; j < lastNumDays; j++ {
+				sum += dailyCases[j]
+			}
+			forecast[i] = sum / numDays
+		}
 	}
 
 	return forecast
