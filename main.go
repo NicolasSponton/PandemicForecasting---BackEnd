@@ -5,7 +5,8 @@ import (
 	"frecastCovid/packages/utils"
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type CaseData struct {
@@ -30,6 +31,7 @@ func main() {
 	}
 
 	e := echo.New()
+	e.Use(middleware.CORS())
 
 	r := e.Group("/app")
 	r.GET("/cases", func(c echo.Context) error {

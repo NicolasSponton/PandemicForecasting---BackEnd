@@ -14,7 +14,6 @@ func CreatePlotAndSave(dailyValues []int, futureValues []int) error {
 		return err
 	}
 
-	// Create a new chart
 	graph := chart.Chart{
 		XAxis: chart.XAxis{
 			Name:      "Days",
@@ -38,14 +37,12 @@ func CreatePlotAndSave(dailyValues []int, futureValues []int) error {
 		},
 	}
 
-	// Create a PNG file
 	file, err := os.Create("files/plot.png")
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	// Write the chart to the PNG file
 	err = graph.Render(chart.PNG, file)
 	if err != nil {
 		return err
