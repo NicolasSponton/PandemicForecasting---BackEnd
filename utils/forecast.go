@@ -29,13 +29,13 @@ func SaveCasesAsCSV(newCases []int) {
 	filePath := "files/new_cases.csv"
 
 	if err := os.MkdirAll("files", os.ModePerm); err != nil {
-		fmt.Println("Error creating 'files' folder:", err)
+		fmt.Println(err.Error())
 		return
 	}
 
 	file, err := os.Create(filePath)
 	if err != nil {
-		fmt.Println("Error creating file:", err)
+		fmt.Println(err.Error())
 		return
 	}
 	defer file.Close()
@@ -46,7 +46,7 @@ func SaveCasesAsCSV(newCases []int) {
 	headers := []string{"date", "new_cases"}
 	err = writer.Write(headers)
 	if err != nil {
-		fmt.Println("Error writing headers:", err)
+		fmt.Println(err.Error())
 		return
 	}
 
@@ -56,7 +56,7 @@ func SaveCasesAsCSV(newCases []int) {
 		row := []string{dateStr, fmt.Sprintf("%d", cases)}
 		err := writer.Write(row)
 		if err != nil {
-			fmt.Println("Error writing row:", err)
+			fmt.Println(err.Error())
 			return
 		}
 

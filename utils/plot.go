@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"time"
 
 	"github.com/wcharczuk/go-chart"
 )
@@ -16,12 +17,24 @@ func CreatePlotAndSave(dailyValues []int, futureValues []int) error {
 
 	graph := chart.Chart{
 		XAxis: chart.XAxis{
-			Name:      "Days",
+			Name:      "Date",
 			NameStyle: chart.StyleShow(),
+			ValueFormatter: func(v interface{}) string {
+				if vf, isFloat := v.(float64); isFloat {
+					today := time.Date(2023, time.August, 25, 0, 0, 0, 0, time.UTC)
+					t := today.AddDate(0, 0, -len(dailyValues)+int(vf))
+					return t.Format("2006-01-02")
+				}
+				return ""
+			},
+			TickPosition: chart.TickPositionBetweenTicks,
+			TickStyle:    chart.StyleShow(),
+			Style:        chart.StyleShow(),
 		},
 		YAxis: chart.YAxis{
-			Name:      "Values",
+			Name:      "Cases",
 			NameStyle: chart.StyleShow(),
+			Style:     chart.StyleShow(),
 		},
 		Series: []chart.Series{
 			chart.ContinuousSeries{
