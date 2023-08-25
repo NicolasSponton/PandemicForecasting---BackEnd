@@ -4,7 +4,7 @@
 Covid Daily Cases Forecasting App - Back End  
 Generated files are stored in the 'files' folder
 
-[Front End App]([https://link-url-here.org](https://github.com/NicolasSponton/PandemicForecasting---FrontEnd/)) can be used for a UI: 
+[Front End App](https://github.com/NicolasSponton/PandemicForecasting---FrontEnd/) can be used for a UI
 
 <!-- GETTING STARTED -->
 ## Getting Started
